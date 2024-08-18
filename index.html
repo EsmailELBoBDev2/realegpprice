@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أسعار العملات الرقمية</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e2a3a;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4fd1c5;
+        }
+
+        .price-info {
+            background-color: #2d3748;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .price-info h2 {
+            color: #4fd1c5;
+            margin-top: 0;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .price {
+            font-weight: bold;
+            color: #4fd1c5;
+        }
+
+        #errorMessage {
+            color: #ff6b6b;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .faq-section {
+            background-color: #2d3748;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .faq-section h2 {
+            color: #4fd1c5;
+            margin-top: 0;
+            border-bottom: 2px solid #4fd1c5;
+            padding-bottom: 10px;
+        }
+
+        .faq-item {
+            margin-bottom: 15px;
+        }
+
+        .faq-question {
+            font-weight: bold;
+            color: #4fd1c5;
+        }
+
+        .faq-answer {
+            margin-top: 5px;
+            color: #e2e8f0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>أسعار العملات الرقمية</h1>
+
+        <div class="price-info">
+            <h2>أسعار الدولار</h2>
+            <div class="price-row">
+                <span>سعر الجنيه الحقيقي:</span>
+                <span class="price" id="parallelMarketPrice">جاري التحميل...</span>
+            </div>
+            <div class="price-row">
+                <span>سعر الدولار:</span>
+                <span class="price" id="bankPrice">جاري التحميل...</span>
+            </div>
+        </div>
+
+        <div class="price-info">
+            <h2>اسعار التعاملات</h2>
+            <div class="price-row">
+                <span>أرخص سعر للشراء:</span>
+                <span class="price" id="lowestBuyPrice">جاري التحميل...</span>
+            </div>
+            <div class="price-row">
+                <span>أعلى سعر للبيع:</span>
+                <span class="price" id="highestSellPrice">جاري التحميل...</span>
+            </div>
+        </div>
+
+        <div class="faq-section">
+            <h2>أسئلة شائعة</h2>
+            <div class="faq-item">
+                <div class="faq-question">الموقع دا اتعمل لية؟</div>
+                <div class="faq-answer">الموقع دا اتعمل علشان اغلبية المواقع التانية مش كاشفين عن مصادرهم و بيوقلوا بيستخدموا ذكاء اصطناعي علشان يحسب السعر فا دا موقع بسيط من عير تعقيدات بيجيب السعر من كذا موقع مختلف اغلبيتنا بنسنخدمه علشان نشتري منه.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">ليه السعر بيتغير بسرعه؟</div>
+                <div class="faq-answer">علشان اللي بيتحكم في السعر عرض وطلب.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">ايه هو مصدر السعر دا؟</div>
+                <div class="faq-answer">سعر الدولار في السوق الموازي بيبقي متوسط سعر عملة الـUSDT علي الـ3 مواقع و هما: Binance و OKX اما سعر الدولار في البنك فا هو مباشره من موقع exchangerate-api.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">السعر بيتحدث امتي؟</div>
+                <div class="faq-answer">السعر بيتحدث كل ريفريش للصفحة.</div>
+            </div>
+        </div>
+
+        <div id="errorMessage"></div>
+    </div>
+
+    <script>
+        const proxyUrl = 'https://cloudflare-cors-anywhere.esmailelbob01124320019.workers.dev/?';
+        const apiKey = '128a06ba1139031764c31a1f'; // Replace with your ExchangeRate-API key
+
+        async function fetchWithProxy(url, timeout = 10000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+
+            try {
+                const response = await fetch(proxyUrl + encodeURIComponent(url), {
+                    signal: controller.signal
+                });
+                clearTimeout(id);
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return await response.text();
+            } catch (error) {
+                console.error(`Error fetching ${url}:`, error);
+                throw error;
+            }
+        }
+
+        async function fetchBinancePrice(tradeType) {
+            const url = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search`;
+            const body = {
+                fiat: "EGP",
+                page: 1,
+                rows: 1,
+                tradeType: tradeType,
+                asset: "USDT",
+                countries: [],
+                proMerchantAds: false,
+                publisherType: null,
+                payTypes: [],
+                classifies: ["mass", "profession"]
+            };
+
+            try {
+                const response = await fetch(proxyUrl + encodeURIComponent(url), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                const data = await response.json();
+                return {
+                    price: parseFloat(data.data[0].adv.price),
+                    platform: 'Binance'
+                };
+            } catch (error) {
+                console.error('Error fetching Binance price:', error);
+                return null;
+            }
+        }
+
+        async function fetchOKXPrice(tradeType) {
+            const url = tradeType === 'BUY' ?
+                'https://www.okx.com/p2p-markets/egp/buy-usdt' :
+                'https://www.okx.com/p2p-markets/egp/sell-usdt';
+
+            try {
+                const html = await fetchWithProxy(url);
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const priceElement = doc.querySelector('td.okui-table-cell span.price');
+                if (!priceElement) {
+                    throw new Error('Price element not found');
+                }
+
+                const price = parseFloat(priceElement.textContent.trim().split(' ')[0]);
+                return {
+                    price: price,
+                    platform: 'OKX'
+                };
+            } catch (error) {
+                console.error('Error fetching OKX price:', error);
+                return null;
+            }
+        }
+
+        async function fetchBankPrice() {
+            const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                return parseFloat(data.conversion_rates.EGP);
+            } catch (error) {
+                console.error('Error fetching bank price:', error);
+            }
+        }
+
+        function calculateMedian(values) {
+            if (values.length === 0) return 0;
+            const sorted = values.slice().sort((a, b) => a - b);
+            const middle = Math.floor(sorted.length / 2);
+            return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
+        }
+
+        async function updatePrices() {
+            try {
+                const [binanceBuy, binanceSell, okxBuy, okxSell, bankPrice] = await Promise
+                    .all([
+                        fetchBinancePrice('BUY'),
+                        fetchBinancePrice('SELL'),
+                        fetchOKXPrice('BUY'),
+                        fetchOKXPrice('SELL'),
+                        fetchBankPrice()
+                    ]);
+
+                const buyPrices = [binanceBuy, okxBuy].filter(price => price !== null);
+                const sellPrices = [binanceSell, okxSell].filter(price => price !== null);
+
+                const lowestBuy = buyPrices.reduce((min, p) => p.price < min.price ? p : min);
+                const highestSell = sellPrices.reduce((max, p) => p.price > max.price ? p : max);
+
+                document.getElementById('lowestBuyPrice').textContent =
+                    `${lowestBuy.price.toFixed(2)} جنيه مصري (${lowestBuy.platform})`;
+                document.getElementById('highestSellPrice').textContent =
+                    `${highestSell.price.toFixed(2)} جنيه مصري (${highestSell.platform})`;
+
+                // Calculate median of buy prices for parallel market
+                const medianBuyPrice = calculateMedian(buyPrices.map(p => p.price));
+                document.getElementById('parallelMarketPrice').textContent =
+                    `${medianBuyPrice.toFixed(2)} جنيه مصري`;
+
+                // Update bank price
+                document.getElementById('bankPrice').textContent =
+                    `${bankPrice.toFixed(2)} جنيه مصري`;
+            } catch (error) {
+                console.error('Error updating prices:', error);
+                document.getElementById('errorMessage').textContent = 'فشل في تحميل الأسعار';
+            }
+        }
+
+        // Update prices
+        updatePrices();
+    </script>
+</body>
+
+</html>
