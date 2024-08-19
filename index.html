@@ -1,290 +1,156 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>أسعار العملات الرقمية</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1e2a3a;
-            color: #ffffff;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        h1 {
-            text-align: center;
-            color: #4fd1c5;
-        }
-
-        .price-info {
-            background-color: #2d3748;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .price-info h2 {
-            color: #4fd1c5;
-            margin-top: 0;
-        }
-
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .price {
-            font-weight: bold;
-            color: #4fd1c5;
-        }
-
-        #errorMessage {
-            color: #ff6b6b;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        .faq-section {
-            background-color: #2d3748;
-            border-radius: 8px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .faq-section h2 {
-            color: #4fd1c5;
-            margin-top: 0;
-            border-bottom: 2px solid #4fd1c5;
-            padding-bottom: 10px;
-        }
-
-        .faq-item {
-            margin-bottom: 15px;
-        }
-
-        .faq-question {
-            font-weight: bold;
-            color: #4fd1c5;
-        }
-
-        .faq-answer {
-            margin-top: 5px;
-            color: #e2e8f0;
-        }
+        body{font-family:Arial,sans-serif;background-color:#1e2a3a;color:#fff;margin:0;padding:20px}.container{max-width:800px;margin:0 auto}h1{text-align:center;color:#4fd1c5}.price-info,.faq-section,.converter-section,.chart-section{background-color:#2d3748;border-radius:8px;padding:20px;margin-bottom:20px}.price-info h2,.faq-section h2,.converter-section h2,.chart-section h2{color:#4fd1c5;margin-top:0}.price-row{display:flex;justify-content:space-between;margin-bottom:10px}.price{font-weight:700;color:#4fd1c5}#errorMessage{color:#ff6b6b;text-align:center;margin-top:20px}.faq-section h2{border-bottom:2px solid #4fd1c5;padding-bottom:10px}.faq-item{margin-bottom:15px}.faq-question{font-weight:700;color:#4fd1c5}.faq-answer{margin-top:5px;color:#e2e8f0}.converter-section{display:flex;justify-content:space-between;align-items:center}.converter-input{width:40%;padding:10px;border-radius:4px;border:none;background-color:#4a5568;color:#fff}.converter-switch{background-color:#4fd1c5;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;justify-content:center;align-items:center;font-size:20px}.chart-container{width:100%;height:300px}#switchCurrency{margin: 10px;}
     </style>
 </head>
-
 <body>
     <div class="container">
         <h1>أسعار العملات الرقمية</h1>
-
         <div class="price-info">
             <h2>أسعار الدولار</h2>
-            <div class="price-row">
-                <span>سعر الدولار الحقيقي:</span>
-                <span class="price" id="parallelMarketPrice">جاري التحميل...</span>
-            </div>
-            <div class="price-row">
-                <span>سعر الدولار:</span>
-                <span class="price" id="bankPrice">جاري التحميل...</span>
-            </div>
+            <div class="price-row"><span>سعر السوق الموازي:</span><span class="price" id="parallelMarketPrice">جاري التحميل...</span></div>
+            <div class="price-row"><span>سعر الدولار الرسمي:</span><span class="price" id="bankPrice">جاري التحميل...</span></div>
         </div>
-
         <div class="price-info">
             <h2>اسعار التعاملات</h2>
-            <div class="price-row">
-                <span>أرخص سعر للشراء:</span>
-                <span class="price" id="lowestBuyPrice">جاري التحميل...</span>
-            </div>
-            <div class="price-row">
-                <span>أعلى سعر للبيع:</span>
-                <span class="price" id="highestSellPrice">جاري التحميل...</span>
-            </div>
+            <div class="price-row"><span>أرخص سعر للشراء:</span><span class="price" id="lowestBuyPrice">جاري التحميل...</span></div>
+            <div class="price-row"><span>أعلى سعر للبيع:</span><span class="price" id="highestSellPrice">جاري التحميل...</span></div>
         </div>
-
+        <div class="converter-section">
+            <h2>محول العملات</h2>
+                <input type="number" id="fromAmount" class="converter-input" placeholder="EGP">
+            <button id="switchCurrency" class="converter-switch">↔</button>
+                <input type="number" id="toAmount" class="converter-input" placeholder="USD" readonly>
+        </div>
+        <div class="chart-section">
+            <h2>مقارنة أسعار الدولار</h2>
+            <canvas id="priceChart"></canvas>
+        </div>
         <div class="faq-section">
             <h2>أسئلة شائعة</h2>
-            <div class="faq-item">
-                <div class="faq-question">الموقع دا اتعمل لية؟</div>
-                <div class="faq-answer">الموقع دا اتعمل علشان اغلبية المواقع التانية مش كاشفين عن مصادرهم و بيقولوا بيستخدموا ذكاء اصطناعي علشان يحسب السعر فا دا موقع بسيط من عير تعقيدات بيجيب السعر من كذا موقع مختلف اغلبيتنا بنسنخدمه علشان نشتري منه.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">ليه السعر بيتغير بسرعه؟</div>
-                <div class="faq-answer">علشان اللي بيتحكم في السعر عرض وطلب.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">ايه هو مصدر السعر دا؟</div>
-                <div class="faq-answer">سعر الدولار في السوق الموازي بيبقي متوسط سعر عملة الـUSDT علي الـ2 مواقع و هما: Binance و OKX اما سعر الدولار في البنك فا هو مباشره من موقع exchangerate-api.</div>
-            </div>
-
-            <div class="faq-item">
-                <div class="faq-question">السعر بيتحدث امتي؟</div>
-                <div class="faq-answer">السعر بيتحدث كل ريفريش للصفحة.</div>
-            </div>
+            <div class="faq-item"><div class="faq-question">الموقع دا اتعمل لية؟</div><div class="faq-answer">الموقع دا اتعمل علشان اغلبية المواقع التانية مش كاشفين عن مصادرهم و بيوقلوا بيستخدموا ذكاء اصطناعي علشان يحسب السعر فا دا موقع بسيط من عير تعقيدات بيجيب السعر من كذا موقع مختلف اغلبيتنا بنسنخدمه علشان نشتري منه.</div></div>
+            <div class="faq-item"><div class="faq-question">ليه السعر بيتغير بسرعه؟</div><div class="faq-answer">علشان اللي بيتحكم في السعر عرض وطلب.</div></div>
+            <div class="faq-item"><div class="faq-question">ايه هو مصدر السعر دا؟</div><div class="faq-answer">سعر الدولار في السوق الموازي بيبقي متوسط سعر عملة الـUSDT علي الـ3 مواقع و هما: Binance و OKX اما سعر الدولار في البنك فا هو مباشره من موقع exchangerate-api.</div></div>
+            <div class="faq-item"><div class="faq-question">السعر بيتحدث امتي؟</div><div class="faq-answer">السعر بيتحدث كل ريفريش للصفحة.</div></div>
         </div>
-
         <div id="errorMessage"></div>
     </div>
-
     <script>
-        const proxyUrl = 'https://cloudflare-cors-anywhere.esmailelbob01124320019.workers.dev/?';
-        const apiKey = '128a06ba1139031764c31a1f'; // Replace with your ExchangeRate-API key
+    const proxyUrl='https://cloudflare-cors-anywhere.esmailelbob01124320019.workers.dev/?',apiKey='128a06ba1139031764c31a1f';
+    let chart;
+    let priceHistory = JSON.parse(localStorage.getItem('priceHistory')) || [];
 
-        async function fetchWithProxy(url, timeout = 10000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
+    async function fetchWithProxy(e,t=1e4){const n=new AbortController,r=setTimeout(()=>n.abort(),t);try{const t=await fetch(proxyUrl+encodeURIComponent(e),{signal:n.signal});if(clearTimeout(r),!t.ok)throw new Error("Network response was not ok");return await t.text()}catch(t){throw console.error(`Error fetching ${e}:`,t),t}}
 
-            try {
-                const response = await fetch(proxyUrl + encodeURIComponent(url), {
-                    signal: controller.signal
-                });
-                clearTimeout(id);
+    async function fetchBinancePrice(e){const t="https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search",n={fiat:"EGP",page:1,rows:1,tradeType:e,asset:"USDT",countries:[],proMerchantAds:!1,publisherType:null,payTypes:[],classifies:["mass","profession"]};try{const e=await fetch(proxyUrl+encodeURIComponent(t),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(n)});if(!e.ok)throw new Error("Network response was not ok");const r=await e.json();return{price:parseFloat(r.data[0].adv.price),platform:"Binance"}}catch(e){return console.error("Error fetching Binance price:",e),null}}
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
+    async function fetchOKXPrice(e){const t="BUY"===e?"https://www.okx.com/p2p-markets/egp/buy-usdt":"https://www.okx.com/p2p-markets/egp/sell-usdt";try{const e=await fetchWithProxy(t),n=(new DOMParser).parseFromString(e,"text/html").querySelector("td.okui-table-cell span.price");if(!n)throw new Error("Price element not found");return{price:parseFloat(n.textContent.trim().split(" ")[0]),platform:"OKX"}}catch(e){return console.error("Error fetching OKX price:",e),null}}
+
+    async function fetchBankPrice(){const e=`https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;try{const t=await fetch(e);if(!t.ok)throw new Error("Network response was not ok");return parseFloat((await t.json()).conversion_rates.EGP)}catch(e){console.error("Error fetching bank price:",e)}}
+
+    function calculateMedian(e){if(0===e.length)return 0;const t=e.slice().sort((e,t)=>e-t),n=Math.floor(t.length/2);return t.length%2==0?(t[n-1]+t[n])/2:t[n]}
+
+    async function updatePrices(){
+        try{
+            const[e,t,n,r,a]=await Promise.all([fetchBinancePrice("BUY"),fetchBinancePrice("SELL"),fetchOKXPrice("BUY"),fetchOKXPrice("SELL"),fetchBankPrice()]);
+            let o=[e,n].filter(e=>e!==null),i=[t,r].filter(e=>e!==null);
+            if(o.length===0)o=[{price:0,platform:"N/A"}];
+            if(i.length===0)i=[{price:0,platform:"N/A"}];
+            const c=o.reduce((e,t)=>e.price<t.price?e:t),l=i.reduce((e,t)=>e.price>t.price?e:t);
+            document.getElementById("lowestBuyPrice").textContent=`${c.price.toFixed(2)} جنيه مصري (${c.platform})`;
+            document.getElementById("highestSellPrice").textContent=`${l.price.toFixed(2)} جنيه مصري (${l.platform})`;
+            const s=calculateMedian(o.map(e=>e.price));
+            document.getElementById("parallelMarketPrice").textContent=`${s.toFixed(2)} جنيه مصري`;
+            document.getElementById("bankPrice").textContent=a?`${a.toFixed(2)} جنيه مصري`:"غير متاح";
+            
+            // Update price history
+            priceHistory.push({date: new Date(), parallelMarketPrice: s, bankPrice: a});
+            if (priceHistory.length > 100) priceHistory.shift(); // Keep only last 100 records
+            localStorage.setItem('priceHistory', JSON.stringify(priceHistory));
+            
+            updateChart();
+            updateConverter(s);
+        }catch(e){
+            console.error("Error updating prices:",e);
+            document.getElementById("errorMessage").textContent="فشل في تحميل الأسعار";
+        }
+    }
+
+    function updateChart() {
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const labels = priceHistory.map(entry => new Date(entry.date).toLocaleTimeString());
+        const parallelMarketData = priceHistory.map(entry => entry.parallelMarketPrice);
+        const bankData = priceHistory.map(entry => entry.bankPrice);
+
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = parallelMarketData;
+            chart.data.datasets[1].data = bankData;
+            chart.update();
+        } else {
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'سعر السوق الموازي',
+                        data: parallelMarketData,
+                        borderColor: '#4fd1c5',
+                        tension: 0.1
+                    }, {
+                        label: 'سعر الدولار الرسمي',
+                        data: bankData,
+                        borderColor: '#FFDF4F',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
                 }
-                return await response.text();
-            } catch (error) {
-                console.error(`Error fetching ${url}:`, error);
-                throw error;
+            });
+        }
+    }
+
+    function updateConverter(rate) {
+        const fromAmount = document.getElementById('fromAmount');
+        const toAmount = document.getElementById('toAmount');
+        const switchBtn = document.getElementById('switchCurrency');
+        let isEGPtoUSD = true;
+
+        function convert() {
+            if (isEGPtoUSD) {
+                toAmount.value = (parseFloat(fromAmount.value) / rate).toFixed(2);
+            } else {
+                toAmount.value = (parseFloat(fromAmount.value) * rate).toFixed(2);
             }
         }
 
-        async function fetchBinancePrice(tradeType) {
-            const url = `https://p2p.binance.com/bapi/c2c/v2/friendly/c2c/adv/search`;
-            const body = {
-                fiat: "EGP",
-                page: 1,
-                rows: 1,
-                tradeType: tradeType,
-                asset: "USDT",
-                countries: [],
-                proMerchantAds: false,
-                publisherType: null,
-                payTypes: [],
-                classifies: ["mass", "profession"]
-            };
+        fromAmount.addEventListener('input', convert);
 
-            try {
-                const response = await fetch(proxyUrl + encodeURIComponent(url), {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(body)
-                });
+        switchBtn.addEventListener('click', () => {
+            isEGPtoUSD = !isEGPtoUSD;
+            const temp = fromAmount.value;
+            fromAmount.value = toAmount.value;
+            toAmount.value = temp;
+            fromAmount.placeholder = isEGPtoUSD ? "EGP" : "USD";
+            toAmount.placeholder = isEGPtoUSD ? "USD" : "EGP";
+            convert();
+        });
+    }
 
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-
-                const data = await response.json();
-                return {
-                    price: parseFloat(data.data[0].adv.price),
-                    platform: 'Binance'
-                };
-            } catch (error) {
-                console.error('Error fetching Binance price:', error);
-                return null;
-            }
-        }
-
-        async function fetchOKXPrice(tradeType) {
-            const url = tradeType === 'BUY' ?
-                'https://www.okx.com/p2p-markets/egp/buy-usdt' :
-                'https://www.okx.com/p2p-markets/egp/sell-usdt';
-
-            try {
-                const html = await fetchWithProxy(url);
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const priceElement = doc.querySelector('td.okui-table-cell span.price');
-                if (!priceElement) {
-                    throw new Error('Price element not found');
-                }
-
-                const price = parseFloat(priceElement.textContent.trim().split(' ')[0]);
-                return {
-                    price: price,
-                    platform: 'OKX'
-                };
-            } catch (error) {
-                console.error('Error fetching OKX price:', error);
-                return null;
-            }
-        }
-
-        async function fetchBankPrice() {
-            const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                return parseFloat(data.conversion_rates.EGP);
-            } catch (error) {
-                console.error('Error fetching bank price:', error);
-            }
-        }
-
-        function calculateMedian(values) {
-            if (values.length === 0) return 0;
-            const sorted = values.slice().sort((a, b) => a - b);
-            const middle = Math.floor(sorted.length / 2);
-            return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
-        }
-
-        async function updatePrices() {
-            try {
-                const [binanceBuy, binanceSell, okxBuy, okxSell, bankPrice] = await Promise
-                    .all([
-                        fetchBinancePrice('BUY'),
-                        fetchBinancePrice('SELL'),
-                        fetchOKXPrice('BUY'),
-                        fetchOKXPrice('SELL'),
-                        fetchBankPrice()
-                    ]);
-
-                const buyPrices = [binanceBuy, okxBuy].filter(price => price !== null);
-                const sellPrices = [binanceSell, okxSell].filter(price => price !== null);
-
-                const lowestBuy = buyPrices.reduce((min, p) => p.price < min.price ? p : min);
-                const highestSell = sellPrices.reduce((max, p) => p.price > max.price ? p : max);
-
-                document.getElementById('lowestBuyPrice').textContent =
-                    `${lowestBuy.price.toFixed(2)} جنيه مصري (${lowestBuy.platform})`;
-                document.getElementById('highestSellPrice').textContent =
-                    `${highestSell.price.toFixed(2)} جنيه مصري (${highestSell.platform})`;
-
-                // Calculate median of buy prices for parallel market
-                const medianBuyPrice = calculateMedian(buyPrices.map(p => p.price));
-                document.getElementById('parallelMarketPrice').textContent =
-                    `${medianBuyPrice.toFixed(2)} جنيه مصري`;
-
-                // Update bank price
-                document.getElementById('bankPrice').textContent =
-                    `${bankPrice.toFixed(2)} جنيه مصري`;
-            } catch (error) {
-                console.error('Error updating prices:', error);
-                document.getElementById('errorMessage').textContent = 'فشل في تحميل الأسعار';
-            }
-        }
-
-        // Update prices
-        updatePrices();
+    updatePrices();
+    setInterval(updatePrices, 60000); // Update every minute
     </script>
 </body>
-
 </html>
