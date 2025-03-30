@@ -34,10 +34,10 @@
         </div>
         <div class="faq-section">
             <h2>أسئلة شائعة</h2>
-            <div class="faq-item"><div class="faq-question">الموقع دا اتعمل لية؟</div><div class="faq-answer">الموقع دا اتعمل علشان اغلبية المواقع التانية مش كاشفين عن مصادرهم و بيوقلوا بيستخدموا ذكاء اصطناعي علشان يحسب السعر فا دا موقع بسيط من عير تعقيدات بيجيب السعر من كذا موقع مختلف اغلبيتنا بنسنخدمه علشان نشتري منه.</div></div>
-            <div class="faq-item"><div class="faq-question">ليه السعر بيتغير بسرعه؟</div><div class="faq-answer">علشان اللي بيتحكم في السعر عرض وطلب.</div></div>
-            <div class="faq-item"><div class="faq-question">ايه هو مصدر السعر دا؟</div><div class="faq-answer">سعر الدولار في السوق الموازي بيبقي متوسط سعر عملة الـUSDT علي الـ2 مواقع و هما: Binance و OKX اما سعر الدولار في البنك فا هو مباشره من موقع exchangerate-api.</div></div>
-            <div class="faq-item"><div class="faq-question">السعر بيتحدث امتي؟</div><div class="faq-answer">السعر بيتحدث كل ريفريش للصفحة.</div></div>
+            <div class="faq-item"><div class="faq-question">الموقع دا اتعمل لية؟</div><div class="faq-answer">الموقع دا اتعمل علشان اغلبية المواقع التانية مش كاشفين عن مصادرةم و بيقولوا بيستخدموا ذكاء اصطناعي علشان يحسب السعر فا دا موقع بسيط من عير تعقيدات بيجيب السعر من كذا موقع مختلف اغلبيتنا بنسنخدمة علشان نشتري منة.</div></div>
+            <div class="faq-item"><div class="faq-question">لية السعر بيتغير بسرعة؟</div><div class="faq-answer">علشان اللي بيتحكم في السعر عرض وطلب.</div></div>
+            <div class="faq-item"><div class="faq-question">اية ةو مصدر السعر دا؟</div><div class="faq-answer">سعر الدولار في السوق الموازي بيبقي متوسط سعر عملة الـUSDT علي الـ2 مواقع و ةما: Binance و OKX اما سعر الدولار في البنك فا ةو مباشرة من موقع exchangerate-api.</div></div>
+            <div class="faq-item"><div class="faq-question">السعر بيتحدث امتي؟</div><div class="faq-answer"> السعر بيتحدث كل ريفريش للصفحة او كل 5 ثواني.</div></div>
         </div>
         <div id="errorMessage"></div>
     </div>
@@ -63,11 +63,11 @@
             if(o.length===0)o=[{price:0,platform:"N/A"}];
             if(i.length===0)i=[{price:0,platform:"N/A"}];
             const c=o.reduce((e,t)=>e.price<t.price?e:t),l=i.reduce((e,t)=>e.price>t.price?e:t);
-            document.getElementById("lowestBuyPrice").textContent=`${c.price.toFixed(2)} جنيه مصري (${c.platform})`;
-            document.getElementById("highestSellPrice").textContent=`${l.price.toFixed(2)} جنيه مصري (${l.platform})`;
+            document.getElementById("lowestBuyPrice").textContent=`${c.price.toFixed(2)} جنية مصري (${c.platform})`;
+            document.getElementById("highestSellPrice").textContent=`${l.price.toFixed(2)} جنية مصري (${l.platform})`;
             const s=calculateMedian(o.map(e=>e.price));
-            document.getElementById("parallelMarketPrice").textContent=`${s.toFixed(2)} جنيه مصري`;
-            document.getElementById("bankPrice").textContent=a?`${a.toFixed(2)} جنيه مصري`:"غير متاح";
+            document.getElementById("parallelMarketPrice").textContent=`${s.toFixed(2)} جنية مصري`;
+            document.getElementById("bankPrice").textContent=a?`${a.toFixed(2)} جنية مصري`:"غير متاح";
             
             // Update price history
             priceHistory.push({date: new Date(), parallelMarketPrice: s, bankPrice: a});
